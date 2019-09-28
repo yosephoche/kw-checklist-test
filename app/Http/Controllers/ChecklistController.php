@@ -34,7 +34,6 @@ class ChecklistController extends Controller
         ]);
 
         try {
-            //code...
             $data = $request->input();
             $data['due'] = Carbon::parse($data['due']);
             $data['created_by'] = $request->user()->id;
@@ -64,15 +63,21 @@ class ChecklistController extends Controller
             'urgency' => 'integer',
         ]);
 
-        $data = $request->input();
-        $data['created_at'] = Carbon::parse($data['created_at']);
-        $data['updated_by'] = $request->user()->id;
+        try {
+            $data = $request->input();
+            $data['created_at'] = Carbon::parse($data['created_at']);
+            $data['updated_by'] = $request->user()->id;
 
-        $updated = Checklist::findOrFail($checklistId);
+            $updated = Checklist::findOrFail($checklistId);
 
-        $updated->update($data);
+            $updated->update($data);
 
-        return new ChecklistResource($updated->fresh());
+            return new ChecklistResource($updated->fresh());
+
+        } catch (\Exception $e) {
+            return response(['status' => '500', 'error' => $e->getMessage()], 500);
+        }
+
     }
 
     public function destroy(Request $request, $checklistId)

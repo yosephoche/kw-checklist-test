@@ -66,14 +66,18 @@ class ItemController extends Controller
             'assignee_id' => 'integer'
         ]);
 
-        $data = $request->input();
-        $data['updated_by'] = $request->user()->id;
-        $data['due'] = Carbon::parse($data['due']);
+        try {
+            $data = $request->input();
+            $data['updated_by'] = $request->user()->id;
+            $data['due'] = Carbon::parse($data['due']);
 
-        $updated = Checklist::findOrFail($checklistId)->items()->findOrFail($itemId);
-        $updated->update($data);
+            $updated = Checklist::findOrFail($checklistId)->items()->findOrFail($itemId);
+            $updated->update($data);
 
-        return new ChecklistItemResource($updated->fresh());
+            return new ChecklistItemResource($updated->fresh());
+        } catch (\Exception $e) {
+            return response(['status' => '500', 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function destroy(Request $request, $checklistId, $itemId)
